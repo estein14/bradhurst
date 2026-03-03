@@ -1,0 +1,757 @@
+<!-- ===============================
+  GOOGLE MAPS — HARLEM (Squarespace)
+  =============================== -->
+<div id="appLayout">
+	<div id="accordionPanel" aria-label="Locations accordion">
+		<div class="ac-search">
+			<div class="field">
+				<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+					<circle
+						cx="11"
+						cy="11"
+						r="7"
+						stroke="white"
+						stroke-width="2"
+						fill="none"
+					/>
+					<line
+						x1="16"
+						y1="16"
+						x2="21"
+						y2="21"
+						stroke="white"
+						stroke-width="2"
+					/>
+				</svg>
+				<input
+					id="acSearch"
+					type="search"
+					placeholder="Search Harlem"
+					aria-label="Search locations"
+				/>
+			</div>
+		</div>
+	</div>
+	<div id="harlemMap" aria-label="Interactive map of Harlem shops"></div>
+</div>
+
+<style>
+	/* ===== (A) LAYOUT — full-screen map with floating accordion ===== */
+	html,
+	body {
+		height: 100%;
+		margin: 0;
+	}
+
+	#appLayout {
+		display: flex;
+		width: 100%;
+		height: auto; /* derive height from aspect ratio */
+		aspect-ratio: var(--map-aspect-ratio, 16/10);
+		max-height: var(--map-max-height, 800px);
+	}
+
+	#harlemMap {
+		flex: 1;
+		height: 100%;
+		min-width: 0; /* allow map to shrink so accordion doesn't wrap */
+		border-radius: 0;
+		box-shadow: none;
+		overflow: hidden;
+	}
+
+	#accordionPanel {
+		position: relative;
+		width: 420px;
+		flex: 0 0 420px; /* fixed sidebar width; do not shrink */
+		height: 100%;
+		max-height: 100%;
+		overflow: auto;
+		/* hide scrollbars but keep scroll */
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+		background: rgba(45, 66, 112, 0.82); /* match water blue */
+		border-right: 2px solid #2d4270; /* divider */
+		box-shadow: none;
+		box-sizing: border-box;
+	}
+
+	/* WebKit */
+	#accordionPanel::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* ===== Responsive accordion sizing & visibility ===== */
+	@media (max-width: 1200px) {
+		#accordionPanel {
+			width: 360px;
+			flex-basis: 360px;
+		}
+	}
+	@media (max-width: 1050px) {
+		#accordionPanel {
+			width: 300px;
+			flex-basis: 300px;
+		}
+	}
+	@media (max-width: 960px) {
+		#accordionPanel {
+			width: 260px;
+			flex-basis: 260px;
+		}
+	}
+	@media (max-width: 800px) {
+		#accordionPanel {
+			display: none;
+		}
+		#appLayout {
+			display: block;
+			width: 100%;
+			height: auto; /* keep aspect ratio on small screens */
+		}
+		#harlemMap {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	#accordionPanel .ac-item {
+		border-bottom: 0;
+		padding: 12px;
+	}
+	#accordionPanel .ac-item:last-child {
+		border-bottom: 0;
+	}
+
+	/* Card-style items with image background and overlayed text */
+	#accordionPanel .ac-card {
+		position: relative;
+		border-radius: 12px;
+		overflow: hidden;
+		min-height: 220px;
+		background: #1b3e6a; /* bluer card base */
+	}
+	#accordionPanel .ac-image {
+		position: absolute;
+		inset: 0;
+		background-image: url("https://images.squarespace-cdn.com/content/v1/67f73c88fa874d611b62f3b9/51f93621-f3c9-4ae5-a81e-b74c6dbab952/Common+Good.png");
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+	#accordionPanel .ac-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0.05) 0%,
+			rgba(0, 0, 0, 0.45) 60%,
+			rgba(0, 0, 0, 0.65) 100%
+		);
+		color: #eef2f7;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		padding: 14px;
+	}
+	#accordionPanel .ac-title {
+		font-weight: 700;
+		font-size: 16px;
+		line-height: 1.2;
+	}
+	#accordionPanel .ac-link {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		background: rgba(20, 75, 83, 0.85); /* SNAZZY admin stroke tinted */
+		color: #ffffff;
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		border-radius: 999px;
+		padding: 6px 10px;
+		text-decoration: none;
+		font-weight: 700;
+	}
+	#accordionPanel .ac-link:hover {
+		background: rgba(20, 75, 83, 1);
+	}
+	#accordionPanel .ac-card:focus-visible,
+	#accordionPanel .ac-link:focus-visible {
+		outline: 2px solid #ffe9d6;
+		outline-offset: 2px;
+	}
+	#accordionPanel .ac-item.selected .ac-card {
+		box-shadow: 0 0 0 2px #ffe9d6 inset; /* highlight selected */
+	}
+
+	/* Remove default summary disclosure marker */
+	#accordionPanel summary.ac-summary {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	#accordionPanel summary.ac-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	/* Search bar */
+	#accordionPanel .ac-search {
+		position: sticky;
+		top: 0;
+		background: rgba(45, 66, 112, 0.92);
+		backdrop-filter: blur(2px);
+		padding: 12px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		z-index: 3;
+		width: 100%;
+		box-sizing: border-box;
+	}
+	#accordionPanel .ac-search .field {
+		position: relative;
+		width: 100%;
+	}
+	#accordionPanel .ac-search input[type="search"] {
+		width: 100%;
+		padding: 10px 12px 10px 36px;
+		border-radius: 999px;
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		background: rgba(0, 0, 0, 0.25);
+		color: #eef2f7;
+		outline: none;
+		display: block;
+		box-sizing: border-box;
+	}
+	#accordionPanel .ac-search .icon {
+		position: absolute;
+		left: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 16px;
+		height: 16px;
+		opacity: 0.8;
+	}
+
+	/* ===== (B) PIN COLORS — adjust brand look here ===== */
+	:root {
+		--pin: #c86d04; /* darker fill color */
+		--pin-stroke: #0f2748; /* darker outline color */
+	}
+</style>
+
+<script>
+	// Ensure responsive media queries work on mobile by adding viewport meta at runtime
+	(function ensureViewportMeta() {
+		if (!document.querySelector('meta[name="viewport"]')) {
+			const m = document.createElement("meta");
+			m.name = "viewport";
+			m.content = "width=device-width, initial-scale=1";
+			document.head.appendChild(m);
+		}
+	})();
+
+	/* ==========================================================
+	     (C) EDIT: INITIAL VIEW / ROTATION
+	     - center: roughly central Harlem
+	     - zoom:   13–19 typical (15 is a good “street” zoom)
+	     - heading: rotate the map (degrees). 0 = north up.
+	     - tilt: 0 keeps it flat; try 45 for a 3D tilt (if available).
+	     NOTE: Rotation/tilt works best with Google’s vector map (mapId).
+	   ========================================================== */
+	const INITIAL = {
+		center: { lat: 40.826, lng: -73.94 },
+		zoom: 16,
+		heading: 360, // <-- EDIT to rotate initial view
+		tilt: 0, // <-- 0 (flat) or 45 (3D, if available)
+	};
+
+	/* ==========================================================
+	     (D) EDIT: SAMPLE PINS
+	     Replace with your real locations. Add as many as you like.
+	   ========================================================== */
+	const locations = [
+		{
+			name: "Patrick’s Place",
+			lat: 40.82702342055423,
+			lng: -73.93939505972165,
+			url: "https://www.patricksplaceharlem.com/",
+		},
+		{
+			name: "Harlem River Mini Mart & Deli",
+			lat: 40.82634218318442,
+			lng: -73.93806578908598,
+			url: "",
+		},
+		{
+			name: "Harlem Vista Hotel",
+			lat: 40.82751474772525,
+			lng: -73.93717728670563,
+			url: "https://www.harlemvistahotel.com/",
+		},
+		{
+			name: "Empire Eye Care",
+			lat: 40.81921791936749,
+			lng: -73.94440755972197,
+			url: "https://empireeyecare.com/",
+		},
+		{
+			name: "Londel’s",
+			lat: 40.819506118732406,
+			lng: -73.94425790204984,
+			url: "https://londels-restaurant.res-menu.com/",
+		},
+		{
+			name: "Mama Tina’s Pizzeria",
+			lat: 40.820816215845824,
+			lng: -73.94373809834593,
+			url: "https://www.mamatinaspizzeria.com/",
+		},
+		{
+			name: "Jacob’s Restaurant",
+			lat: 40.82226091834446,
+			lng: -73.94303002571263,
+			url: "https://www.jacobrestaurant.com/",
+		},
+		{
+			name: "99 Cents Store",
+			lat: 40.82202301820721,
+			lng: -73.94292227329144,
+			url: "",
+		},
+		{
+			name: "SKYLINE FOOD CENTER",
+			lat: 40.822787937699516,
+			lng: -73.94180042743965,
+			url: "",
+		},
+		{
+			name: "City One",
+			lat: 40.82271958731191,
+			lng: -73.94167635794884,
+			url: "",
+		},
+		{
+			name: "D’ Bomby Barbershop",
+			lat: 40.8235204820691,
+			lng: -73.94178674047893,
+			url: "",
+		},
+		{
+			name: "Western Union",
+			lat: 40.82379458047835,
+			lng: -73.9445490483183,
+			url: "",
+		},
+		{
+			name: "Timbuktu Islamic Center",
+			lat: 40.82378442040575,
+			lng: -73.94435850691012,
+			url: "https://timbuktuislamiccenter.com/",
+		},
+	];
+
+	// Mapping: location index -> accordion details element (kept in sync with filtering)
+	let accordionItems = [];
+
+	// Build accordion UI from locations
+	function buildAccordion(markers, map, info) {
+		const panel = document.getElementById("accordionPanel");
+		const listContainer = document.createElement("div");
+		listContainer.id = "acList";
+		panel.querySelectorAll("#acList").forEach((n) => n.remove());
+		panel.appendChild(listContainer);
+
+		const query = (
+			document.getElementById("acSearch")?.value || ""
+		).toLowerCase();
+		const filtered = locations.filter((loc) => {
+			const hay = `${loc.name || ""} ${loc.url || ""}`.toLowerCase();
+			return hay.includes(query);
+		});
+
+		accordionItems = [];
+
+		filtered.forEach((loc, idxFiltered) => {
+			const idx = locations.indexOf(loc);
+
+			const details = document.createElement("details");
+			details.className = "ac-item";
+			// Keep all expanded per request
+			details.open = true;
+
+			const summary = document.createElement("summary");
+			summary.className = "ac-summary"; // still clickable
+			const hasUrl = Boolean(loc.url);
+			summary.innerHTML = `
+                <div class="ac-card" tabindex="0">
+                    <div class="ac-image"></div>
+                    ${
+						hasUrl
+							? `
+                    <a class="ac-link" href="${loc.url}" target="_blank" rel="noopener" aria-label="Open website">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M14 3H21V10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 14L21 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 14V21H3V3H10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>`
+							: ""
+					}
+                    <div class="ac-overlay">
+                        <div class="ac-title">${loc.name}</div>
+                    </div>
+                </div>
+            `;
+
+			const body = document.createElement("div");
+			body.className = "ac-body";
+			// additional text/details could go here later
+
+			details.appendChild(summary);
+			details.appendChild(body);
+			listContainer.appendChild(details);
+			accordionItems[idx] = details;
+			window.accordionItems = accordionItems; // expose for marker click handler
+
+			// Sync: clicking the accordion summary centers and selects the marker
+			summary.addEventListener("click", (e) => {
+				e.preventDefault();
+				// Keep all open; mark selected for styling
+				panel
+					.querySelectorAll("details.ac-item")
+					.forEach((d) => d.classList.remove("selected"));
+				details.classList.add("selected");
+
+				const marker = markers[idx];
+				const pos = marker.getPosition();
+				map.panTo(pos);
+				google.maps.event.trigger(marker, "click");
+			});
+		});
+	}
+
+	const SNAZZY_STYLE = [
+		{
+			featureType: "all",
+			elementType: "labels.text.fill",
+			stylers: [{ color: "#ffffff" }],
+		},
+		{
+			featureType: "all",
+			elementType: "labels.text.stroke",
+			stylers: [{ color: "#000000" }, { lightness: 13 }],
+		},
+		{
+			featureType: "administrative",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#000000" }],
+		},
+		{
+			featureType: "administrative",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#144b53" }, { lightness: 14 }, { weight: 1.4 }],
+		},
+		{
+			featureType: "landscape",
+			elementType: "all",
+			stylers: [{ color: "#08304b" }],
+		},
+		{
+			featureType: "poi",
+			elementType: "geometry",
+			stylers: [{ color: "#0c4152" }, { lightness: 5 }],
+		},
+		{
+			featureType: "road.highway",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#000000" }],
+		},
+		{
+			featureType: "road.highway",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#0b434f" }, { lightness: 25 }],
+		},
+		{
+			featureType: "road.arterial",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#000000" }],
+		},
+		{
+			featureType: "road.arterial",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#0b3d51" }, { lightness: 16 }],
+		},
+		{
+			featureType: "road.local",
+			elementType: "geometry",
+			stylers: [{ color: "#000000" }],
+		},
+		{
+			featureType: "transit",
+			elementType: "all",
+			stylers: [{ color: "#146474" }],
+		},
+		{
+			featureType: "water",
+			elementType: "all",
+			stylers: [{ color: "#021019" }],
+		},
+	];
+
+	const CUSTOM_STYLE = [
+		// Labels
+		{
+			featureType: "all",
+			elementType: "labels.text.fill",
+			stylers: [{ color: "#1a3f70" }],
+		},
+		{
+			featureType: "all",
+			elementType: "labels.text.stroke",
+			stylers: [{ color: "#f2f2e1" }],
+		},
+		// Water labels readable
+		{
+			featureType: "water",
+			elementType: "labels.text.fill",
+			stylers: [{ color: "#ffffff" }],
+		},
+
+		// Land
+		{
+			featureType: "landscape.man_made",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#FFC37A" }],
+		},
+		{
+			featureType: "landscape.natural",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#43ab4a" }],
+		},
+
+		// Parks (moved later to ensure it overrides generic POI styling)
+
+		// Water
+		{
+			featureType: "water",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#2d4270" }],
+		},
+
+		{
+			featureType: "poi",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#c3c7c3" }],
+		},
+		{
+			featureType: "poi.business",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#c3c7c3" }],
+		},
+		// Ensure parks stay green by overriding generic POI fill
+		{
+			featureType: "poi.park",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#5cb564" }],
+		},
+
+		// Roads
+		{
+			featureType: "road",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#fafffc" }],
+		},
+		{
+			featureType: "road.local",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#fafffc" }],
+		},
+		{
+			featureType: "road.arterial",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#fafffc" }],
+		},
+		{
+			featureType: "road.highway",
+			elementType: "geometry.fill",
+			stylers: [{ color: "#fceecc" }],
+		},
+		{
+			featureType: "road",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#c3c7c3" }],
+		},
+		{
+			featureType: "road.highway",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#c3c7c3" }],
+		},
+
+		// Boundaries
+		{
+			featureType: "administrative",
+			elementType: "geometry.stroke",
+			stylers: [{ color: "#c3c7c3" }],
+		},
+	];
+
+	// Hide POI labels/icons and transit icons, keep geometry so buildings render
+	const HIDE_DEFAULT_PINS = [
+		{
+			featureType: "poi",
+			elementType: "labels",
+			stylers: [{ visibility: "off" }],
+		},
+		{
+			featureType: "poi",
+			elementType: "labels.icon",
+			stylers: [{ visibility: "off" }],
+		},
+		{
+			featureType: "poi",
+			elementType: "labels.text",
+			stylers: [{ visibility: "off" }],
+		},
+		{
+			featureType: "transit",
+			elementType: "labels.icon",
+			stylers: [{ visibility: "off" }],
+		},
+		{
+			featureType: "transit",
+			elementType: "labels.text",
+			stylers: [{ visibility: "off" }],
+		},
+	];
+
+	// Re-enable park labels with specific styling
+	const PARK_LABELS = [
+		{
+			featureType: "poi.park",
+			elementType: "labels.text.fill",
+			stylers: [{ visibility: "on" }, { color: "#ffffff" }],
+		},
+		{
+			featureType: "poi.park",
+			elementType: "labels.text.stroke",
+			stylers: [{ visibility: "on" }, { color: "#43ab4a" }],
+		},
+	];
+
+	/* ==========================================================
+	     (E) OPTIONAL: FIT TO MARKERS ON LOAD
+	     If true, the map will auto-zoom to show all pins, overriding
+	     the INITIAL.zoom/center just once on load.
+	   ========================================================== */
+	const FIT_TO_MARKERS_ON_LOAD = true; // set to true if you prefer
+
+	/* ==========================================================
+	     (F) MAP BOOTSTRAP — usually no need to edit below here
+	   ========================================================== */
+	function initHarlemMap() {
+		// Pin icon style (clean circle to match your design)
+		const pinIcon = {
+			path: google.maps.SymbolPath.CIRCLE,
+			scale: 8,
+			fillColor: getCSS("--pin", "#c86d04"),
+			fillOpacity: 1,
+			strokeColor: getCSS("--pin-stroke", "#0f2748"),
+			strokeWeight: 3,
+		};
+
+		// Create the map
+		const map = new google.maps.Map(document.getElementById("harlemMap"), {
+			center: INITIAL.center,
+			zoom: INITIAL.zoom,
+			heading: INITIAL.heading,
+			tilt: INITIAL.tilt,
+			gestureHandling: "greedy",
+			fullscreenControl: true,
+			streetViewControl: false,
+			mapTypeControl: false,
+			styles: [...HIDE_DEFAULT_PINS, ...CUSTOM_STYLE, ...PARK_LABELS],
+			// mapId: 'DEMO_MAP_ID' // enables modern vector map (rotation/tilt)
+		});
+
+		// Markers + popups
+		const info = new google.maps.InfoWindow();
+		const markers = locations.map((loc, idx) => {
+			const m = new google.maps.Marker({
+				position: { lat: loc.lat, lng: loc.lng },
+				title: loc.name,
+				// icon: pinIcon,
+				map,
+			});
+			m.addListener("click", () => {
+				const html = `<div>
+	           <strong style="font-weight:600">${loc.name}</strong>
+	           ${
+					loc.url
+						? `<br><a href="${loc.url}" target="_blank" rel="noopener">Website</a>`
+						: ``
+				}
+	         </div>`;
+				info.setContent(html);
+				info.open({ anchor: m, map });
+				// Highlight matching accordion item on marker click
+				const panel = document.getElementById("accordionPanel");
+				const items = panel.querySelectorAll("details.ac-item");
+				items.forEach((d, i) =>
+					d.classList.toggle("selected", i === idx)
+				);
+				map.panTo(m.getPosition());
+				// Scroll only inside accordion panel (avoid page scroll), aim for center
+				const targetEl =
+					window.accordionItems && window.accordionItems[idx];
+				const panelEl = document.getElementById("accordionPanel");
+				if (targetEl && panelEl) {
+					const targetTop = targetEl.offsetTop;
+					const targetCenter =
+						targetTop -
+						panelEl.clientHeight / 2 +
+						targetEl.offsetHeight / 2;
+					panelEl.scrollTo({ top: targetCenter, behavior: "smooth" });
+				}
+			});
+			return m;
+		});
+
+		// Build accordion after markers exist
+		buildAccordion(markers, map, info);
+		const search = document.getElementById("acSearch");
+		if (search) {
+			search.addEventListener("input", () =>
+				buildAccordion(markers, map, info)
+			);
+		}
+
+		// Cluster markers (works automatically as you zoom out)
+		new markerClusterer.MarkerClusterer({ map, markers });
+
+		// Optional: auto-fit to pins on load
+		if (FIT_TO_MARKERS_ON_LOAD && markers.length) {
+			const bounds = new google.maps.LatLngBounds();
+			markers.forEach((m) => bounds.extend(m.getPosition()));
+			map.fitBounds(bounds, 48);
+		}
+
+		// Expose helpers if you want to tweak live from console
+		window._gmap = map;
+		window.rotateMap = (deg) => map.setHeading(deg); // e.g., rotateMap(45)
+		window.setTilt = (t) => map.setTilt(t); // e.g., setTilt(45)
+		window.setZoom = (z) => map.setZoom(z); // e.g., setZoom(16)
+	}
+
+	// Helper: read CSS custom props with a fallback
+	function getCSS(varName, fallback) {
+		const v = getComputedStyle(document.documentElement)
+			.getPropertyValue(varName)
+			.trim();
+		return v || fallback;
+	}
+</script>
+
+<!-- ===== (G) GOOGLE MAPS LOADER — insert your API key below ===== -->
+<script
+	async
+	defer
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAbnw9WA9Jkin7leSqsSSND8TFqr9iaTQw&callback=initHarlemMap"
+></script>
