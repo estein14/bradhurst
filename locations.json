@@ -1,0 +1,99 @@
+[
+	{
+		"name": "Patrick’s Place",
+		"lat": 40.82702342055423,
+		"lng": -73.93939505972165,
+		"url": "https://www.patricksplaceharlem.com/",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2Fdea3b316-f1c9-4f60-a8f0-4749a96d66b2/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAACdn9ItWdrVeeDfYEy7V8z9bbQLaeVgjQY4G4wM-Qnag&exp=1768514721&osig=AAAAAAAAAAAAAAAAAAAAAM-BZZ4g-dGuHT-yHmevqorxLDNmPKyIqKfKVnW6w9U9&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "Harlem River Mini Mart & Deli",
+		"lat": 40.82634218318442,
+		"lng": -73.93806578908598,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:ifs%3A%2F%2FM%2F7836c76e-6878-4c52-8275-10963e910da2/watermark:F/width:753?csig=AAAAAAAAAAAAAAAAAAAAAIpxANaw3QmCJF03bF1oWGRvgbqbPM2wJjcnrnGv8VwK&exp=1768514222&osig=AAAAAAAAAAAAAAAAAAAAALER6qHHx2hGBuuWkc1_7C7yMeKCdTBTsSbGTJnU6hfG&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "Harlem Vista Hotel",
+		"lat": 40.82751474772525,
+		"lng": -73.93717728670563,
+		"url": "https://www.harlemvistahotel.com/",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:1000/quality:92/uri:ifs%3A%2F%2FM%2Ff19998de-065f-4519-a083-f66e50b0852d/watermark:F/width:562?csig=AAAAAAAAAAAAAAAAAAAAAKq5bAROrVAaOmthJcLXvkqVWGVn9bCVWQ4uW9CD-ubV&exp=1768516550&osig=AAAAAAAAAAAAAAAAAAAAAC6rFYFyFd0PzeJLQK1mz_jGBQ54aa7WYTQO29T1x9qm&signer=media-rpc&x-canva-quality=screen_2x"
+	},
+	{
+		"name": "Empire Eye Care",
+		"address": "2610 8th Ave. Frederick Douglass Blvd New York, NY 10030",
+		"phone": "1-347-632-2610",
+		"lat": 40.81921791936749,
+		"lng": -73.94440755972197,
+		"url": "https://empireeyecare.com/",
+		"image": "images/EmpireEyeCare.jpg"
+	},
+	{
+		"name": "Londel’s",
+		"address": "2620 8th Ave. Frederick Douglass Blvd New York, NY 10030",
+		"phone": "1-212-234-6114",
+		"lat": 40.819506118732406,
+		"lng": -73.94425790204984,
+		"url": "https://londels-restaurant.res-menu.com/",
+		"image": "images/londels.webp"
+	},
+	{
+		"name": "Mama Tina’s Pizzeria",
+		"address": "2649 8th Ave 141 -142nd St Frederick Douglass Blvd New York, NY",
+		"phone": "1-212-368-2820",
+		"lat": 40.820816215845824,
+		"lng": -73.94373809834593,
+		"url": "https://www.mamatinaspizzeria.com/",
+		"image": "images/MamaTinas.jpg"
+	},
+	{
+		"name": "Jacob’s Restaurant",
+		"lat": 40.82226091834446,
+		"lng": -73.94303002571263,
+		"url": "https://www.jacobrestaurant.com/",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2F77276e8d-b872-4435-b090-6ccead534998/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAACvWWZWZCgAtkdV6B6r55DamsKaCym8wGl6QfjhGV2s6&exp=1768514436&osig=AAAAAAAAAAAAAAAAAAAAAFA_XPXYIxioU05N3ZbUOEDvuR6f_cAEp8vqRmvtk9gG&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "99 Cents Store",
+		"lat": 40.82202301820721,
+		"lng": -73.94292227329144,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2F71a36039-daf3-4043-8f85-dad09f154f94/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAAMWoGkSBFnKDVpa4gvxDlIelqFs8S92qJn5UbeGk0eMm&exp=1768516611&osig=AAAAAAAAAAAAAAAAAAAAAEz7bZxj-uDbeKP9GiYCZK0N7Cfvljrdw-3d-3Htv3UA&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "SKYLINE FOOD CENTER",
+		"lat": 40.822787937699516,
+		"lng": -73.94180042743965,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:600/quality:92/uri:ifs%3A%2F%2FM%2F1d29a0fb-ca3e-41bc-84df-1b7f2d2d36e4/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAAIUlOz2XujlXat9Xllguiqej6dWQ0OOjsRNnZHS66GXi&exp=1768515329&osig=AAAAAAAAAAAAAAAAAAAAAI_oqsSbAfW0f5njT7q_6-Cjb9mcs0aqmiSOMMqXAAym&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "City One",
+		"lat": 40.82271958731191,
+		"lng": -73.94167635794884,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:566/quality:92/uri:ifs%3A%2F%2FM%2Fe81e16b7-fe8a-4b6c-8648-8c8b4b62fbad/watermark:F/width:755?csig=AAAAAAAAAAAAAAAAAAAAALDWvV5CiQJ1Os-Tt0qwlAdgsyeUZk_ha-8xEdAc557a&exp=1768516631&osig=AAAAAAAAAAAAAAAAAAAAANaEVHFTuBcdQao5Onmox3yl4MG4hzd93zKYAxJQBR5k&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "D’ Bomby Barbershop",
+		"lat": 40.8235204820691,
+		"lng": -73.94178674047893,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:709/quality:92/uri:ifs%3A%2F%2FM%2F77f43c0b-6b7c-49d0-8368-8e1298708cde/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAANjeqFtszN-RcWAn5MnEfoAe0081_W2km32gupPKiyEh&exp=1768515025&osig=AAAAAAAAAAAAAAAAAAAAALTAyN6BWL_6Gp53_2M2ViZ_9CiFxMBVcHkSfRcygdw_&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "Western Union",
+		"lat": 40.82379458047835,
+		"lng": -73.9445490483183,
+		"url": "",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:444/quality:92/uri:ifs%3A%2F%2FM%2F64fade01-40ec-44ba-982a-06eafaed3ee4/watermark:F/width:382?csig=AAAAAAAAAAAAAAAAAAAAAIUBa4cnp74D2bk3dJsKCx0Gc34IZxq20JdkAv1aDnGH&exp=1768513724&osig=AAAAAAAAAAAAAAAAAAAAAEXs8FXlqzxwM4T7raoCCvkChzGP1QrfXgBCwwZ38fL2&signer=media-rpc&x-canva-quality=screen"
+	},
+	{
+		"name": "Timbuktu Islamic Center",
+		"lat": 40.82378442040575,
+		"lng": -73.94435850691012,
+		"url": "https://timbuktuislamiccenter.com/",
+		"image": "https://media.canva.com/v2/image-resize/format:JPG/height:350/quality:92/uri:ifs%3A%2F%2FM%2F8e4eab1d-f8ba-44af-9314-11e60fe31c02/watermark:F/width:391?csig=AAAAAAAAAAAAAAAAAAAAANCzcNz6VMq4_T7fGKE-NgmECRAHLR58Rm3BanXsfOG2&exp=1768515543&osig=AAAAAAAAAAAAAAAAAAAAADgBwDN8KbFf-Qh9FBx4wIOS-YDkANQBGvYRv3ICLPRV&signer=media-rpc&x-canva-quality=screen"
+	}
+]

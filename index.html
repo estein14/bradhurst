@@ -2,7 +2,32 @@
   GOOGLE MAPS — HARLEM (Squarespace)
   =============================== -->
 <div id="appLayout">
+	<button
+		id="hamburgerBtn"
+		type="button"
+		aria-label="Open locations menu"
+		aria-expanded="false"
+	>
+		<svg viewBox="0 0 24 24" aria-hidden="true">
+			<path
+				d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"
+				fill="currentColor"
+			/>
+		</svg>
+	</button>
 	<div id="accordionPanel" aria-label="Locations accordion">
+		<button
+			id="closePanelBtn"
+			type="button"
+			aria-label="Close locations menu"
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+					fill="currentColor"
+				/>
+			</svg>
+		</button>
 		<div class="ac-search">
 			<div class="field">
 				<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -66,6 +91,15 @@
 	/* Hide close button */
 	.gm-ui-hover-effect {
 		display: none !important;
+	}
+
+	/* Popup Get Directions link hover */
+	.gm-style .gm-style-iw-d a[href*="google.com/maps/dir"]:hover {
+		text-decoration: underline;
+	}
+	/* Popup website button hover */
+	.gm-style .gm-style-iw-d a[aria-label="Open website"]:hover {
+		background: rgba(132, 132, 132, 0.8) !important;
 	}
 
 	/* ===== (A) LAYOUT — full-screen map with floating accordion ===== */
@@ -141,9 +175,112 @@
 			flex-basis: 260px;
 		}
 	}
+	/* Hamburger button — hidden on larger screens */
+	#hamburgerBtn {
+		display: none;
+		position: fixed;
+		top: 16px;
+		left: 16px;
+		z-index: 10;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		border: none;
+		border-radius: 12px;
+		background: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+		cursor: pointer;
+		color: #000;
+		align-items: center;
+		justify-content: center;
+	}
+	#hamburgerBtn svg {
+		width: 24px;
+		height: 24px;
+	}
+	#hamburgerBtn:hover {
+		background: rgba(255, 255, 255, 1);
+	}
+	#hamburgerBtn:focus-visible {
+		outline: 2px solid #ffe9d6;
+		outline-offset: 2px;
+	}
+
+	/* Close button — inside accordion, hidden until overlay open */
+	#closePanelBtn {
+		display: none;
+		position: absolute;
+		top: 16px;
+		right: 16px;
+		z-index: 11;
+		width: 44px;
+		height: 44px;
+		padding: 0;
+		border: none;
+		border-radius: 12px;
+		background: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+		cursor: pointer;
+		color: #000;
+		align-items: center;
+		justify-content: center;
+	}
+	#closePanelBtn svg {
+		width: 22px;
+		height: 22px;
+	}
+	#closePanelBtn:hover {
+		background: rgba(255, 255, 255, 1);
+	}
+	#closePanelBtn:focus-visible {
+		outline: 2px solid #ffe9d6;
+		outline-offset: 2px;
+	}
+
 	@media (max-width: 800px) {
+		#hamburgerBtn {
+			display: flex;
+		}
 		#accordionPanel {
 			display: none;
+		}
+		#accordionPanel.mobile-overlay-open {
+			display: flex;
+			position: fixed;
+			inset: 12px;
+			top: 12px;
+			left: 12px;
+			right: 12px;
+			bottom: 12px;
+			width: auto;
+			max-width: 500px;
+			max-height: none;
+			height: auto;
+			z-index: 100;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+			border-radius: 18px;
+			padding: 16px 16px 16px 16px;
+			flex-direction: column;
+		}
+		#accordionPanel.mobile-overlay-open #closePanelBtn {
+			display: flex;
+		}
+		#accordionPanel.mobile-overlay-open .ac-search {
+			margin-top: 8px;
+			padding-right: 48px; /* room for close button */
+			box-sizing: border-box;
+		}
+		#accordionPanel.mobile-overlay-open .ac-results {
+			flex: 1;
+			max-height: none;
+			min-height: 0;
 		}
 		#appLayout {
 			display: block;
@@ -176,12 +313,12 @@
 	#accordionPanel .ac-image {
 		position: relative;
 		width: 100%;
-		height: 140px;
+		height: 200px;
 		flex-shrink: 0;
 		border-radius: 10px;
 		/* Per-location background image is set inline via JS */
 		background-size: cover;
-		background-position: center;
+		background-position: top;
 		background-repeat: no-repeat;
 	}
 	#accordionPanel .ac-content {
@@ -202,32 +339,52 @@
 		opacity: 0.9;
 		margin-bottom: 5px;
 	}
+	#accordionPanel .ac-contact-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		flex-wrap: wrap;
+		margin-top: 4px;
+	}
 	#accordionPanel .ac-phone {
 		font-size: 13px;
 		font-weight: 400;
 		text-decoration: none;
 		color: #000000;
 	}
-	#accordionPanel .ac-link {
-		position: absolute;
-		top: 10px;
-		right: 10px;
-		background: rgba(255, 255, 255, 0.24); /* lighter for blur effect */
-		backdrop-filter: blur(10px);
-		-webkit-backdrop-filter: blur(14px);
-		color: #ffffff;
-		border: 1px solid rgba(255, 255, 255, 0.25);
-
-		border-radius: 999px;
-		padding: 6px 10px;
+	#accordionPanel .ac-directions {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 13px;
+		font-weight: 500;
+		color: #545454;
 		text-decoration: none;
-		font-weight: 700;
+		white-space: nowrap;
 	}
-	#accordionPanel .ac-link:hover {
-		background: rgb(132, 132, 132);
+	#accordionPanel .ac-directions svg {
+		width: 16px;
+		height: 16px;
+		flex-shrink: 0;
+	}
+	#accordionPanel .ac-directions:hover {
+		text-decoration: underline;
+	}
+	#accordionPanel .ac-url {
+		font-size: 12px;
+		color: #000000;
+		margin-bottom: 4px;
+		text-decoration: none;
+		word-break: break-all;
+		margin-top: 4px;
+		display: inline-block;
+	}
+	#accordionPanel .ac-url:hover {
+		opacity: 0.8;
 	}
 	#accordionPanel .ac-card:focus-visible,
-	#accordionPanel .ac-link:focus-visible {
+	#accordionPanel .ac-url:focus-visible {
 		outline: 2px solid #ffe9d6;
 		outline-offset: 2px;
 	}
@@ -268,24 +425,42 @@
 		border-radius: 14px;
 		padding: 10px 10px 4px 10px;
 	}
+	#accordionPanel .ac-empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 40px 24px;
+		text-align: center;
+		color: rgba(0, 0, 0, 0.5);
+	}
+	#accordionPanel .ac-empty-state svg {
+		width: 48px;
+		height: 48px;
+		opacity: 0.6;
+	}
+	#accordionPanel .ac-empty-state span {
+		font-size: 16px;
+		font-weight: 500;
+	}
 	#accordionPanel .ac-search .field {
 		position: relative;
 		width: 100%;
 	}
 	#accordionPanel .ac-search-input {
 		width: 100%;
-		height: 40px;
+		background: transparent !important;
+		height: 50px;
 		padding: 0 12px 0 36px;
+		font-size: 16px;
+		border: 1px solid #00000000;
 		border-radius: 14px;
-		background: rgba(255, 255, 255, 0.64); /* lighter for blur effect */
-		backdrop-filter: blur(14px);
-		border: 0px solid rgba(255, 255, 255, 0.25);
-		-webkit-backdrop-filter: blur(14px);
 		line-height: 40px; /* vertically center placeholder and text */
 		outline: none;
-		display: block;
 		box-sizing: border-box;
 	}
+
 	#accordionPanel .ac-search .icon {
 		position: absolute;
 		left: 12px;
@@ -313,6 +488,36 @@
 		}
 	})();
 
+	// Mobile hamburger menu — toggle accordion overlay on small screens
+	(function initMobileMenu() {
+		const hamburger = document.getElementById("hamburgerBtn");
+		const closeBtn = document.getElementById("closePanelBtn");
+		const panel = document.getElementById("accordionPanel");
+		if (!hamburger || !closeBtn || !panel) return;
+
+		function openOverlay() {
+			panel.classList.add("mobile-overlay-open");
+			hamburger.setAttribute("aria-expanded", "true");
+		}
+		function closeOverlay() {
+			panel.classList.remove("mobile-overlay-open");
+			hamburger.setAttribute("aria-expanded", "false");
+		}
+
+		hamburger.addEventListener("click", openOverlay);
+		closeBtn.addEventListener("click", closeOverlay);
+
+		// Optional: close on escape key
+		document.addEventListener("keydown", (e) => {
+			if (
+				e.key === "Escape" &&
+				panel.classList.contains("mobile-overlay-open")
+			) {
+				closeOverlay();
+			}
+		});
+	})();
+
 	/* ==========================================================
 	     (C) EDIT: INITIAL VIEW / ROTATION
 	     - center: roughly central Harlem
@@ -332,28 +537,7 @@
 	     (D) EDIT: SAMPLE PINS
 	     Replace with your real locations. Add as many as you like.
 	   ========================================================== */
-	const locations = [
-		{
-			name: "Patrick’s Place",
-			lat: 40.82702342055423,
-			lng: -73.93939505972165,
-			url: "https://www.patricksplaceharlem.com/",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2Fdea3b316-f1c9-4f60-a8f0-4749a96d66b2/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAACdn9ItWdrVeeDfYEy7V8z9bbQLaeVgjQY4G4wM-Qnag&exp=1768514721&osig=AAAAAAAAAAAAAAAAAAAAAM-BZZ4g-dGuHT-yHmevqorxLDNmPKyIqKfKVnW6w9U9&signer=media-rpc&x-canva-quality=screen",
-		},
-		{
-			name: "Harlem River Mini Mart & Deli",
-			lat: 40.82634218318442,
-			lng: -73.93806578908598,
-			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:ifs%3A%2F%2FM%2F7836c76e-6878-4c52-8275-10963e910da2/watermark:F/width:753?csig=AAAAAAAAAAAAAAAAAAAAAIpxANaw3QmCJF03bF1oWGRvgbqbPM2wJjcnrnGv8VwK&exp=1768514222&osig=AAAAAAAAAAAAAAAAAAAAALER6qHHx2hGBuuWkc1_7C7yMeKCdTBTsSbGTJnU6hfG&signer=media-rpc&x-canva-quality=screen",
-		},
-		{
-			name: "Harlem Vista Hotel",
-			lat: 40.82751474772525,
-			lng: -73.93717728670563,
-			url: "https://www.harlemvistahotel.com/",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:1000/quality:92/uri:ifs%3A%2F%2FM%2Ff19998de-065f-4519-a083-f66e50b0852d/watermark:F/width:562?csig=AAAAAAAAAAAAAAAAAAAAAKq5bAROrVAaOmthJcLXvkqVWGVn9bCVWQ4uW9CD-ubV&exp=1768516550&osig=AAAAAAAAAAAAAAAAAAAAAC6rFYFyFd0PzeJLQK1mz_jGBQ54aa7WYTQO29T1x9qm&signer=media-rpc&x-canva-quality=screen_2x",
-		},
+	let locations = [
 		{
 			name: "Empire Eye Care",
 			address: "2610 8th Ave. Frederick Douglass Blvd New York, NY 10030",
@@ -363,6 +547,32 @@
 			url: "https://empireeyecare.com/",
 			image: "images/EmpireEyeCare.jpg",
 		},
+		{
+			name: "Patrick’s Place",
+			address: "2835 Frederick Douglass Blvd New York, NY",
+			phone: "1-212-491-7800",
+			lat: 40.82702342055423,
+			lng: -73.93939505972165,
+			url: "https://www.patricksplaceharlem.com/",
+			image: "images/PatricksPlace.jpg",
+		},
+		// {
+		// 	name: "Harlem River Mini Mart & Deli",
+		// 	lat: 40.82634218318442,
+		// 	lng: -73.93806578908598,
+		// 	url: "",
+		// 	image: "https://media.canva.com/v2/image-resize/format:PNG/height:800/quality:100/uri:ifs%3A%2F%2FM%2F7836c76e-6878-4c52-8275-10963e910da2/watermark:F/width:753?csig=AAAAAAAAAAAAAAAAAAAAAIpxANaw3QmCJF03bF1oWGRvgbqbPM2wJjcnrnGv8VwK&exp=1768514222&osig=AAAAAAAAAAAAAAAAAAAAALER6qHHx2hGBuuWkc1_7C7yMeKCdTBTsSbGTJnU6hfG&signer=media-rpc&x-canva-quality=screen",
+		// },
+		{
+			name: "Harlem Vista Hotel",
+			address: "75 Macombs Pl, New York, NY 10039",
+			phone: "1-917-507-4140",
+			lat: 40.82751474772525,
+			lng: -73.93717728670563,
+			url: "https://www.harlemvistahotel.com/",
+			image: "images/HarlemVistaHotel.jpg",
+		},
+
 		{
 			name: "Londel’s",
 			address: "2620 8th Ave. Frederick Douglass Blvd New York, NY 10030",
@@ -384,52 +594,84 @@
 		},
 		{
 			name: "Jacob’s Restaurant",
+			address: "2695 8th Ave Frederick Douglass Blvd New York, NY",
+			phone: "1-212-283-3663",
 			lat: 40.82226091834446,
 			lng: -73.94303002571263,
 			url: "https://www.jacobrestaurant.com/",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2F77276e8d-b872-4435-b090-6ccead534998/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAACvWWZWZCgAtkdV6B6r55DamsKaCym8wGl6QfjhGV2s6&exp=1768514436&osig=AAAAAAAAAAAAAAAAAAAAAFA_XPXYIxioU05N3ZbUOEDvuR6f_cAEp8vqRmvtk9gG&signer=media-rpc&x-canva-quality=screen",
+			image: "images/jacobs.webp",
 		},
 		{
 			name: "99 Cents Store",
+			address: "2701 8th Ave Frederick Douglass Blvd New York, NY",
+			phone: "1-212-690-0380",
 			lat: 40.82202301820721,
 			lng: -73.94292227329144,
 			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:348/quality:92/uri:ifs%3A%2F%2FM%2F71a36039-daf3-4043-8f85-dad09f154f94/watermark:F/width:348?csig=AAAAAAAAAAAAAAAAAAAAAMWoGkSBFnKDVpa4gvxDlIelqFs8S92qJn5UbeGk0eMm&exp=1768516611&osig=AAAAAAAAAAAAAAAAAAAAAEz7bZxj-uDbeKP9GiYCZK0N7Cfvljrdw-3d-3Htv3UA&signer=media-rpc&x-canva-quality=screen",
+			image: "images/99cent.jpg",
 		},
 		{
 			name: "SKYLINE FOOD CENTER",
+			address: "2726 8th Ave Frederick Douglass Blvd New York, NY",
+			phone: "1-646-649-5423",
 			lat: 40.822787937699516,
 			lng: -73.94180042743965,
 			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:600/quality:92/uri:ifs%3A%2F%2FM%2F1d29a0fb-ca3e-41bc-84df-1b7f2d2d36e4/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAAIUlOz2XujlXat9Xllguiqej6dWQ0OOjsRNnZHS66GXi&exp=1768515329&osig=AAAAAAAAAAAAAAAAAAAAAI_oqsSbAfW0f5njT7q_6-Cjb9mcs0aqmiSOMMqXAAym&signer=media-rpc&x-canva-quality=screen",
+			image: "images/SkylineFoodCenter.webp",
 		},
 		{
 			name: "City One",
+			address: "2726 8th Ave Frederick Douglass Blvd New York, NY 10039",
+			phone: "1-646-649-5423",
 			lat: 40.82271958731191,
 			lng: -73.94167635794884,
 			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:566/quality:92/uri:ifs%3A%2F%2FM%2Fe81e16b7-fe8a-4b6c-8648-8c8b4b62fbad/watermark:F/width:755?csig=AAAAAAAAAAAAAAAAAAAAALDWvV5CiQJ1Os-Tt0qwlAdgsyeUZk_ha-8xEdAc557a&exp=1768516631&osig=AAAAAAAAAAAAAAAAAAAAANaEVHFTuBcdQao5Onmox3yl4MG4hzd93zKYAxJQBR5k&signer=media-rpc&x-canva-quality=screen",
+			image: "images/CityOne.jpg",
 		},
 		{
 			name: "D’ Bomby Barbershop",
+			address: "2733 8th Ave Frederick Douglass Blvd New York, NY 10039",
+			phone: "1-646-524-6995",
 			lat: 40.8235204820691,
 			lng: -73.94178674047893,
 			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:709/quality:92/uri:ifs%3A%2F%2FM%2F77f43c0b-6b7c-49d0-8368-8e1298708cde/watermark:F/width:800?csig=AAAAAAAAAAAAAAAAAAAAANjeqFtszN-RcWAn5MnEfoAe0081_W2km32gupPKiyEh&exp=1768515025&osig=AAAAAAAAAAAAAAAAAAAAALTAyN6BWL_6Gp53_2M2ViZ_9CiFxMBVcHkSfRcygdw_&signer=media-rpc&x-canva-quality=screen",
+			image: "images/DBomby.jpg",
 		},
 		{
-			name: "Western Union",
+			name: "Western Union (CFSC)",
+			address: "358 W 145th St New York, NY 10039",
+			phone: "1-212-368-1657",
 			lat: 40.82379458047835,
 			lng: -73.9445490483183,
 			url: "",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:444/quality:92/uri:ifs%3A%2F%2FM%2F64fade01-40ec-44ba-982a-06eafaed3ee4/watermark:F/width:382?csig=AAAAAAAAAAAAAAAAAAAAAIUBa4cnp74D2bk3dJsKCx0Gc34IZxq20JdkAv1aDnGH&exp=1768513724&osig=AAAAAAAAAAAAAAAAAAAAAEXs8FXlqzxwM4T7raoCCvkChzGP1QrfXgBCwwZ38fL2&signer=media-rpc&x-canva-quality=screen",
+			image: "images/WesternUnion.jpg",
 		},
 		{
 			name: "Timbuktu Islamic Center",
+			address: "350 W 145th St New York, NY 10039",
+			phone: "1-917-892-2043",
 			lat: 40.82378442040575,
 			lng: -73.94435850691012,
 			url: "https://timbuktuislamiccenter.com/",
-			image: "https://media.canva.com/v2/image-resize/format:JPG/height:350/quality:92/uri:ifs%3A%2F%2FM%2F8e4eab1d-f8ba-44af-9314-11e60fe31c02/watermark:F/width:391?csig=AAAAAAAAAAAAAAAAAAAAANCzcNz6VMq4_T7fGKE-NgmECRAHLR58Rm3BanXsfOG2&exp=1768515543&osig=AAAAAAAAAAAAAAAAAAAAADgBwDN8KbFf-Qh9FBx4wIOS-YDkANQBGvYRv3ICLPRV&signer=media-rpc&x-canva-quality=screen",
+			image: "images/IslamicCenter.webp",
+		},
+		{
+			name: "Flamboyant Hair",
+			address: "346 W 145th St New York, NY 10039",
+			phone: "1-646-649-5423",
+			lat: 40.82381262182082,
+			lng: -73.94423951602049,
+			url: "https://www.flamboyanthairllc.com/",
+			image: "images/FlamboyantHair.jpg",
+		},
+		{
+			name: "Suagr Hill Fish Place",
+			address: "346 W 145th St New York, NY 10039 Sugar Hill Fish Place",
+			phone: "1-646-692-3939",
+			lat: 40.823836978100516,
+			lng: -73.94427170252546,
+			url: "https://shfishplace.wixsite.com/sugar-hill-fish-plac",
+			image: "images/SugarHillFish.jpg",
 		},
 	];
 
@@ -462,6 +704,20 @@
 
 		accordionItems = [];
 
+		if (filtered.length === 0) {
+			const emptyEl = document.createElement("div");
+			emptyEl.className = "ac-empty-state";
+			emptyEl.innerHTML = `
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<circle cx="11" cy="11" r="8"/>
+					<path d="m21 21-4.35-4.35"/>
+				</svg>
+				<span>No Results</span>
+			`;
+			listContainer.appendChild(emptyEl);
+			return;
+		}
+
 		filtered.forEach((loc, idxFiltered) => {
 			const idx = locations.indexOf(loc);
 
@@ -476,24 +732,13 @@
 			const phoneHref = loc.phone
 				? `tel:${loc.phone.replace(/[^0-9+]/g, "")}`
 				: "";
+			const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
 			summary.innerHTML = `
                 <div class="ac-card" tabindex="0">
                     <div class="ac-image" style="background-image: url('${
 						loc.image ||
 						"https://images.squarespace-cdn.com/content/v1/67f73c88fa874d611b62f3b9/51f93621-f3c9-4ae5-a81e-b74c6dbab952/Common+Good.png"
 					}');"></div>
-                    ${
-						hasUrl
-							? `
-                    <a class="ac-link" href="${loc.url}" target="_blank" rel="noopener" aria-label="Open website">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M14 3H21V10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M10 14L21 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M21 14V21H3V3H10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </a>`
-							: ""
-					}
                     <div class="ac-content">
                         <div class="ac-title">${loc.name}</div>
                         ${
@@ -502,10 +747,21 @@
 								: ""
 						}
                         ${
+							hasUrl
+								? `<a class="ac-url" href="${loc.url}" target="_blank" rel="noopener">${loc.url}</a>`
+								: ""
+						}
+                        <div class="ac-contact-row">
+                        ${
 							loc.phone
 								? `<a class="ac-phone" href="${phoneHref}">${loc.phone}</a>`
 								: ""
 						}
+                        <a class="ac-directions" href="${directionsUrl}" target="_blank" rel="noopener" aria-label="Get directions">
+                        
+                        Get Directions
+						<svg viewBox="0 0 24 24 " fill="currentColor" aria-hidden="true"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></a>
+                        </div>
                     </div>
                 </div>
             `;
@@ -755,7 +1011,7 @@
 	/* ==========================================================
 	     (F) MAP BOOTSTRAP — usually no need to edit below here
 	   ========================================================== */
-	function initHarlemMap() {
+	async function initHarlemMap() {
 		// Pin icon style (clean circle to match your design)
 		const pinIcon = {
 			// soft teardrop (rounder, less pointy)
@@ -802,30 +1058,38 @@
 			const phoneHref = loc.phone
 				? `tel:${loc.phone.replace(/[^0-9+]/g, "")}`
 				: "";
+			const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+			const popupWebsiteBtn = loc.url
+				? `<a href="${loc.url}" target="_blank" rel="noopener" aria-label="Open website" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.24);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(14px);color:#ffffff;border:1px solid rgba(255,255,255,0.25);border-radius:999px;padding:6px 10px;text-decoration:none;font-weight:700;z-index:1;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H21V10"/><path d="M10 14L21 3"/><path d="M21 14V21H3V3H10"/></svg>
+          </a>`
+				: "";
 			const popupHtml = `
         <div
           style="
-            width: 300px;
+            width: 380px;
 			box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             border-radius: 8px;
             overflow: hidden;
+            position: relative;
           "
         >
           <div
             style="
               width: 100%;
-              height: 140px;
+              height: 240px;
               margin: 0;
               padding: 0;
               border-radius: 0;
               background-image: url('${imageUrl}');
               background-size: cover;
               background-position: center;
+              position: relative;
             "
-          ></div>
+          >${popupWebsiteBtn}</div>
           <div
             style="
               margin: 0;
@@ -846,11 +1110,14 @@
 					? `<div style="font-size:14px; text-decoration:underline; margin-bottom:7px; color:#000000;">${loc.address}</div>`
 					: ""
 			}
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-top:6px;">
             ${
 				loc.phone
 					? `<a href="${phoneHref}" style="font-size:14px; color:#000000; text-decoration:none;">${loc.phone}</a>`
 					: ""
 			}
+            <a href="${directionsUrl}" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:500; color:#c86d04; text-decoration:none;">Get Directions<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;flex-shrink:0" aria-hidden="true"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></a>
+            </div>
           </div>
         </div>`;
 
