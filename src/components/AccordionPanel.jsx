@@ -18,11 +18,26 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
 import SearchOffIcon from "@mui/icons-material/SearchOff";
+import TurnRightIcon from "@mui/icons-material/TurnRight";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 
 const FALLBACK_IMG =
 	"https://images.squarespace-cdn.com/content/v1/67f73c88fa874d611b62f3b9/51f93621-f3c9-4ae5-a81e-b74c6dbab952/Common+Good.png";
+
+/** Website row: own line, single line with ellipsis (full URL in native tooltip). */
+const panelWebsiteLinkSx = {
+	display: "block",
+	width: "100%",
+	minWidth: 0,
+	mt: 0.5,
+	mb: 0.75,
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+	whiteSpace: "nowrap",
+	textDecoration: "none",
+	"&:hover": { textDecoration: "none" },
+};
 
 /** One radius everywhere in this panel (px) — matches theme.shape.borderRadius */
 const RX = 12;
@@ -35,6 +50,7 @@ const CATEGORIES = [
 	{ value: "clothing", label: "Clothing" },
 	{ value: "salon-barbershop", label: "Salon / Barbershop" },
 	{ value: "services", label: "Services & more" },
+	{ value: "landmarks", label: "Landmarks" },
 ];
 
 const neutralOutlineSx = (embed) => ({
@@ -92,16 +108,30 @@ export function AccordionPanel({
 	category,
 	onCategoryChange,
 	filteredLocations,
+	filteredLandmarks,
 	allLocations,
 	onSelectLocation,
+	onSelectLandmark,
 	scrollIntoViewIdx,
 	onScrollConsumed,
+	scrollIntoViewLandmarkId,
+	onLandmarkScrollConsumed,
 	embed,
 }) {
 	const [namesOnly, setNamesOnly] = useState(false);
 	const isNarrowScreen = useMediaQuery("(max-width:800px)");
 	const resultsRef = useRef(/** @type {HTMLDivElement | null} */ (null));
 	const itemRefs = useRef(/** @type {(HTMLDivElement | null)[]} */ ([]));
+	const landmarkItemRefs = useRef(
+		/** @type {Record<string, HTMLDivElement | null>} */ ({}),
+	);
+
+	const showLandmarksOnly = category === "landmarks";
+	const showAllMixed = category === "all";
+	/** Businesses + landmarks (same layout as “All”), including when a narrower category search matches a landmark. */
+	const showMixedLandmarksPanel =
+		showAllMixed ||
+		(!showLandmarksOnly && filteredLandmarks.length > 0);
 
 	const scrollToIndex = (globalIdx) => {
 		const el = itemRefs.current[globalIdx];
@@ -126,6 +156,28 @@ export function AccordionPanel({
 		return () => cancelAnimationFrame(id);
 	}, [scrollIntoViewIdx, onScrollConsumed]);
 
+	useEffect(() => {
+		if (scrollIntoViewLandmarkId == null) return;
+		const id = requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				const el = landmarkItemRefs.current[scrollIntoViewLandmarkId];
+				const resultsEl = resultsRef.current;
+				if (!el || !resultsEl) {
+					onLandmarkScrollConsumed();
+					return;
+				}
+				const targetTop = el.offsetTop - resultsEl.offsetTop;
+				const targetCenter =
+					targetTop -
+					resultsEl.clientHeight / 2 +
+					el.offsetHeight / 2;
+				resultsEl.scrollTo({ top: targetCenter, behavior: "smooth" });
+				onLandmarkScrollConsumed();
+			});
+		});
+		return () => cancelAnimationFrame(id);
+	}, [scrollIntoViewLandmarkId, onLandmarkScrollConsumed]);
+
 	const panelEmbedSx = embed
 		? {
 				bgcolor: "rgba(45, 66, 112, 0.82)",
@@ -137,6 +189,12 @@ export function AccordionPanel({
 		`accordion-panel` +
 		(isNarrowScreen ? " mobile-overlay-open" : "") +
 		(namesOnly ? " accordion-panel--compact" : "");
+
+	const listIsEmpty = showLandmarksOnly
+		? filteredLandmarks.length === 0
+		: showMixedLandmarksPanel
+			? filteredLocations.length === 0 && filteredLandmarks.length === 0
+			: filteredLocations.length === 0;
 
 	const filledInputSx = (t) => ({
 		color: t.palette.text.primary,
@@ -295,8 +353,573 @@ export function AccordionPanel({
 							scrollbarWidth: "thin",
 						}}
 					>
-						{filteredLocations.length === 0 ? (
+						{listIsEmpty ? (
 							<EmptyState />
+						) : showLandmarksOnly && namesOnly ? (
+							<List dense disablePadding id="acList">
+								{filteredLandmarks.map((lm) => (
+									<Box
+										key={lm.id}
+										ref={(el) => {
+											landmarkItemRefs.current[lm.id] = el;
+										}}
+										sx={{
+											scrollMarginTop: 1,
+											"&:last-child": { mb: 0.5 },
+										}}
+									>
+										<ListItemButton
+											dense
+											onClick={() => onSelectLandmark(lm.id)}
+											sx={{
+												borderRadius: `${RX}px`,
+												py: 0.75,
+												alignItems: "flex-start",
+												color: "text.primary",
+												"&:hover": {
+													bgcolor: "rgba(0,0,0,0.06)",
+												},
+											}}
+										>
+											<ListItemText
+												primary={lm.name}
+												primaryTypographyProps={{
+													variant: "body2",
+													sx: {
+														fontWeight: 500,
+														lineHeight: 1.35,
+													},
+												}}
+											/>
+										</ListItemButton>
+									</Box>
+								))}
+							</List>
+						) : showLandmarksOnly ? (
+							<Stack spacing={1.5} component="div" id="acList">
+								{filteredLandmarks.map((lm) => {
+									const phoneHref = lm.phone
+										? `tel:${lm.phone.replace(/[^0-9+]/g, "")}`
+										: "";
+									const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lm.lat},${lm.lng}`;
+									const hasUrl = Boolean(lm.learnMoreUrl);
+									const img = lm.image || FALLBACK_IMG;
+
+									return (
+										<Box
+											key={lm.id}
+											ref={(el) => {
+												landmarkItemRefs.current[lm.id] = el;
+											}}
+											sx={{
+												scrollMarginTop: 1,
+												"&:last-child": { mb: 1 },
+											}}
+										>
+											<Card
+												variant="outlined"
+												sx={{
+													borderRadius: `${RX}px`,
+													overflow: "hidden",
+													borderColor: "grey.400",
+													"&:hover": {
+														borderColor: "grey.600",
+														boxShadow: 1,
+													},
+												}}
+											>
+												<Box
+													onClick={() => onSelectLandmark(lm.id)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															onSelectLandmark(lm.id);
+														}
+													}}
+													role="button"
+													tabIndex={0}
+													sx={{
+														cursor: "pointer",
+														"&:focus-visible": {
+															outline: "2px solid",
+															outlineColor: "grey.500",
+															outlineOffset: 2,
+															borderRadius: `${RX}px`,
+														},
+													}}
+												>
+													<CardMedia
+														component="div"
+														sx={{
+															height: 200,
+															backgroundImage: `url('${img.replace(/'/g, "\\'")}')`,
+															backgroundSize: "cover",
+															backgroundPosition: "top center",
+														}}
+													/>
+													<CardContent sx={{ pt: 1.5, pb: 2, px: 2, minWidth: 0 }}>
+														<Typography
+															variant="subtitle1"
+															component="h2"
+															gutterBottom
+														>
+															{lm.name}
+														</Typography>
+														{lm.address ? (
+															<Typography
+																variant="caption"
+																display="block"
+																sx={{
+																	mb: 0.75,
+																	opacity: 0.95,
+																}}
+															>
+																{lm.address}
+															</Typography>
+														) : null}
+														{hasUrl ? (
+															<Link
+																href={lm.learnMoreUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="caption"
+																display="block"
+																title={lm.learnMoreUrl}
+																sx={panelWebsiteLinkSx}
+																onClick={(e) => e.stopPropagation()}
+															>
+																{lm.learnMoreLabel || lm.learnMoreUrl}
+															</Link>
+														) : null}
+														<Box
+															sx={{
+																display: "flex",
+																alignItems: "center",
+																width: "100%",
+																mt: hasUrl ? 0 : 0.5,
+																gap: 1,
+																minWidth: 0,
+															}}
+														>
+															<Box sx={{ minWidth: 0, flex: 1 }}>
+																{lm.phone ? (
+																	<Link
+																		href={phoneHref}
+																		variant="body2"
+																		color="text.primary"
+																		underline="none"
+																		onClick={(e) => e.stopPropagation()}
+																	>
+																		{lm.phone}
+																	</Link>
+																) : null}
+															</Box>
+															<Link
+																href={directionsUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="body2"
+																fontWeight={600}
+																color="text.secondary"
+																aria-label="Get directions"
+																underline="none"
+																onClick={(e) => e.stopPropagation()}
+																sx={{
+																	display: "inline-flex",
+																	alignItems: "center",
+																	ml: "auto",
+																	flexShrink: 0,
+																}}
+															>
+																<TurnRightIcon
+																	sx={{ fontSize: 28 }}
+																	aria-hidden
+																/>
+															</Link>
+														</Box>
+													</CardContent>
+												</Box>
+											</Card>
+										</Box>
+									);
+								})}
+							</Stack>
+						) : showMixedLandmarksPanel && namesOnly ? (
+							<List dense disablePadding id="acList">
+								{filteredLocations.map((loc) => {
+									const idx = allLocations.indexOf(loc);
+									return (
+										<Box
+											key={`${loc.name}-${idx}`}
+											ref={(el) => {
+												itemRefs.current[idx] = el;
+											}}
+											sx={{
+												scrollMarginTop: 1,
+												"&:last-child": { mb: 0.5 },
+											}}
+										>
+											<ListItemButton
+												dense
+												onClick={() => onSelectLocation(idx)}
+												sx={{
+													borderRadius: `${RX}px`,
+													py: 0.75,
+													alignItems: "flex-start",
+													color: "text.primary",
+													"&:hover": {
+														bgcolor: "rgba(0,0,0,0.06)",
+													},
+												}}
+											>
+												<ListItemText
+													primary={loc.name}
+													primaryTypographyProps={{
+														variant: "body2",
+														sx: {
+															fontWeight: 500,
+															lineHeight: 1.35,
+														},
+													}}
+												/>
+											</ListItemButton>
+										</Box>
+									);
+								})}
+								{filteredLandmarks.map((lm) => (
+									<Box
+										key={lm.id}
+										ref={(el) => {
+											landmarkItemRefs.current[lm.id] = el;
+										}}
+										sx={{
+											scrollMarginTop: 1,
+											"&:last-child": { mb: 0.5 },
+										}}
+									>
+										<ListItemButton
+											dense
+											onClick={() => onSelectLandmark(lm.id)}
+											sx={{
+												borderRadius: `${RX}px`,
+												py: 0.75,
+												alignItems: "flex-start",
+												color: "text.primary",
+												"&:hover": {
+													bgcolor: "rgba(0,0,0,0.06)",
+												},
+											}}
+										>
+											<ListItemText
+												primary={lm.name}
+												primaryTypographyProps={{
+													variant: "body2",
+													sx: {
+														fontWeight: 500,
+														lineHeight: 1.35,
+													},
+												}}
+											/>
+										</ListItemButton>
+									</Box>
+								))}
+							</List>
+						) : showMixedLandmarksPanel ? (
+							<Stack spacing={1.5} component="div" id="acList">
+								{filteredLocations.map((loc) => {
+									const idx = allLocations.indexOf(loc);
+									const hasUrl = Boolean(loc.url);
+									const phoneHref = loc.phone
+										? `tel:${loc.phone.replace(/[^0-9+]/g, "")}`
+										: "";
+									const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+									const img = loc.image || FALLBACK_IMG;
+
+									return (
+										<Box
+											key={`${loc.name}-${idx}`}
+											ref={(el) => {
+												itemRefs.current[idx] = el;
+											}}
+											sx={{
+												scrollMarginTop: 1,
+												"&:last-child": { mb: 1 },
+											}}
+										>
+											<Card
+												variant="outlined"
+												sx={{
+													borderRadius: `${RX}px`,
+													overflow: "hidden",
+													borderColor: "grey.400",
+													"&:hover": {
+														borderColor: "grey.600",
+														boxShadow: 1,
+													},
+												}}
+											>
+												<Box
+													onClick={() => onSelectLocation(idx)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															onSelectLocation(idx);
+														}
+													}}
+													role="button"
+													tabIndex={0}
+													sx={{
+														cursor: "pointer",
+														"&:focus-visible": {
+															outline: "2px solid",
+															outlineColor: "grey.500",
+															outlineOffset: 2,
+															borderRadius: `${RX}px`,
+														},
+													}}
+												>
+													<CardMedia
+														component="div"
+														sx={{
+															height: 200,
+															backgroundImage: `url('${img.replace(/'/g, "\\'")}')`,
+															backgroundSize: "cover",
+															backgroundPosition: "top center",
+														}}
+													/>
+													<CardContent sx={{ pt: 1.5, pb: 2, px: 2, minWidth: 0 }}>
+														<Typography
+															variant="subtitle1"
+															component="h2"
+															gutterBottom
+														>
+															{loc.name}
+														</Typography>
+														{loc.address ? (
+															<Typography
+																variant="caption"
+																display="block"
+																sx={{
+																	mb: 0.75,
+																	opacity: 0.95,
+																}}
+															>
+																{loc.address}
+															</Typography>
+														) : null}
+														{hasUrl ? (
+															<Link
+																href={loc.url}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="caption"
+																display="block"
+																title={loc.url}
+																sx={panelWebsiteLinkSx}
+																onClick={(e) => e.stopPropagation()}
+															>
+																{loc.url}
+															</Link>
+														) : null}
+														<Box
+															sx={{
+																display: "flex",
+																alignItems: "center",
+																width: "100%",
+																mt: hasUrl ? 0 : 0.5,
+																gap: 1,
+																minWidth: 0,
+															}}
+														>
+															<Box sx={{ minWidth: 0, flex: 1 }}>
+																{loc.phone ? (
+																	<Link
+																		href={phoneHref}
+																		variant="body2"
+																		color="text.primary"
+																		underline="none"
+																		onClick={(e) => e.stopPropagation()}
+																	>
+																		{loc.phone}
+																	</Link>
+																) : null}
+															</Box>
+															<Link
+																href={directionsUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="body2"
+																fontWeight={600}
+																color="text.secondary"
+																aria-label="Get directions"
+																underline="none"
+																onClick={(e) => e.stopPropagation()}
+																sx={{
+																	display: "inline-flex",
+																	alignItems: "center",
+																	ml: "auto",
+																	flexShrink: 0,
+																}}
+															>
+																<TurnRightIcon
+																	sx={{ fontSize: 28 }}
+																	aria-hidden
+																/>
+															</Link>
+														</Box>
+													</CardContent>
+												</Box>
+											</Card>
+										</Box>
+									);
+								})}
+								{filteredLandmarks.map((lm) => {
+									const phoneHref = lm.phone
+										? `tel:${lm.phone.replace(/[^0-9+]/g, "")}`
+										: "";
+									const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lm.lat},${lm.lng}`;
+									const hasUrl = Boolean(lm.learnMoreUrl);
+									const img = lm.image || FALLBACK_IMG;
+
+									return (
+										<Box
+											key={lm.id}
+											ref={(el) => {
+												landmarkItemRefs.current[lm.id] = el;
+											}}
+											sx={{
+												scrollMarginTop: 1,
+												"&:last-child": { mb: 1 },
+											}}
+										>
+											<Card
+												variant="outlined"
+												sx={{
+													borderRadius: `${RX}px`,
+													overflow: "hidden",
+													borderColor: "grey.400",
+													"&:hover": {
+														borderColor: "grey.600",
+														boxShadow: 1,
+													},
+												}}
+											>
+												<Box
+													onClick={() => onSelectLandmark(lm.id)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															onSelectLandmark(lm.id);
+														}
+													}}
+													role="button"
+													tabIndex={0}
+													sx={{
+														cursor: "pointer",
+														"&:focus-visible": {
+															outline: "2px solid",
+															outlineColor: "grey.500",
+															outlineOffset: 2,
+															borderRadius: `${RX}px`,
+														},
+													}}
+												>
+													<CardMedia
+														component="div"
+														sx={{
+															height: 200,
+															backgroundImage: `url('${img.replace(/'/g, "\\'")}')`,
+															backgroundSize: "cover",
+															backgroundPosition: "top center",
+														}}
+													/>
+													<CardContent sx={{ pt: 1.5, pb: 2, px: 2, minWidth: 0 }}>
+														<Typography
+															variant="subtitle1"
+															component="h2"
+															gutterBottom
+														>
+															{lm.name}
+														</Typography>
+														{lm.address ? (
+															<Typography
+																variant="caption"
+																display="block"
+																sx={{
+																	mb: 0.75,
+																	opacity: 0.95,
+																}}
+															>
+																{lm.address}
+															</Typography>
+														) : null}
+														{hasUrl ? (
+															<Link
+																href={lm.learnMoreUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="caption"
+																display="block"
+																title={lm.learnMoreUrl}
+																sx={panelWebsiteLinkSx}
+																onClick={(e) => e.stopPropagation()}
+															>
+																{lm.learnMoreLabel || lm.learnMoreUrl}
+															</Link>
+														) : null}
+														<Box
+															sx={{
+																display: "flex",
+																alignItems: "center",
+																width: "100%",
+																mt: hasUrl ? 0 : 0.5,
+																gap: 1,
+																minWidth: 0,
+															}}
+														>
+															<Box sx={{ minWidth: 0, flex: 1 }}>
+																{lm.phone ? (
+																	<Link
+																		href={phoneHref}
+																		variant="body2"
+																		color="text.primary"
+																		underline="none"
+																		onClick={(e) => e.stopPropagation()}
+																	>
+																		{lm.phone}
+																	</Link>
+																) : null}
+															</Box>
+															<Link
+																href={directionsUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="body2"
+																fontWeight={600}
+																color="text.secondary"
+																aria-label="Get directions"
+																underline="none"
+																onClick={(e) => e.stopPropagation()}
+																sx={{
+																	display: "inline-flex",
+																	alignItems: "center",
+																	ml: "auto",
+																	flexShrink: 0,
+																}}
+															>
+																<TurnRightIcon
+																	sx={{ fontSize: 28 }}
+																	aria-hidden
+																/>
+															</Link>
+														</Box>
+													</CardContent>
+												</Box>
+											</Card>
+										</Box>
+									);
+								})}
+							</Stack>
 						) : namesOnly ? (
 							<List dense disablePadding id="acList">
 								{filteredLocations.map((loc) => {
@@ -403,7 +1026,7 @@ export function AccordionPanel({
 															backgroundPosition: "top center",
 														}}
 													/>
-													<CardContent sx={{ pt: 1.5, pb: 2, px: 2 }}>
+													<CardContent sx={{ pt: 1.5, pb: 2, px: 2, minWidth: 0 }}>
 														<Typography
 															variant="subtitle1"
 															component="h2"
@@ -416,7 +1039,6 @@ export function AccordionPanel({
 																variant="caption"
 																display="block"
 																sx={{
-																	textDecoration: "underline",
 																	mb: 0.75,
 																	opacity: 0.95,
 																}}
@@ -431,37 +1053,36 @@ export function AccordionPanel({
 																rel="noopener noreferrer"
 																variant="caption"
 																display="block"
-																sx={{
-																	wordBreak: "break-all",
-																	mb: 0.75,
-																	mt: 0.5,
-																}}
+																title={loc.url}
+																sx={panelWebsiteLinkSx}
 																onClick={(e) => e.stopPropagation()}
 															>
 																{loc.url}
 															</Link>
 														) : null}
-														<Stack
-															direction="row"
-															justifyContent="space-between"
-															alignItems="center"
-															flexWrap="wrap"
-															useFlexGap
-															sx={{ gap: 1, mt: 0.5 }}
+														<Box
+															sx={{
+																display: "flex",
+																alignItems: "center",
+																width: "100%",
+																mt: hasUrl ? 0 : 0.5,
+																gap: 1,
+																minWidth: 0,
+															}}
 														>
-															{loc.phone ? (
-																<Link
-																	href={phoneHref}
-																	variant="body2"
-																	color="text.primary"
-																	underline="hover"
-																	onClick={(e) => e.stopPropagation()}
-																>
-																	{loc.phone}
-																</Link>
-															) : (
-																<span />
-															)}
+															<Box sx={{ minWidth: 0, flex: 1 }}>
+																{loc.phone ? (
+																	<Link
+																		href={phoneHref}
+																		variant="body2"
+																		color="text.primary"
+																		underline="none"
+																		onClick={(e) => e.stopPropagation()}
+																	>
+																		{loc.phone}
+																	</Link>
+																) : null}
+															</Box>
 															<Link
 																href={directionsUrl}
 																target="_blank"
@@ -469,13 +1090,22 @@ export function AccordionPanel({
 																variant="body2"
 																fontWeight={600}
 																color="text.secondary"
-																sx={{ whiteSpace: "nowrap" }}
 																aria-label="Get directions"
+																underline="none"
 																onClick={(e) => e.stopPropagation()}
+																sx={{
+																	display: "inline-flex",
+																	alignItems: "center",
+																	ml: "auto",
+																	flexShrink: 0,
+																}}
 															>
-																Directions
+																<TurnRightIcon
+																	sx={{ fontSize: 28 }}
+																	aria-hidden
+																/>
 															</Link>
-														</Stack>
+														</Box>
 													</CardContent>
 												</Box>
 											</Card>

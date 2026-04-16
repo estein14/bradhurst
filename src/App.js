@@ -1,6 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { HarlemMap } from "./components/HarlemMap";
 import { AccordionPanel } from "./components/AccordionPanel";
+import {
+	getFilteredLandmarks,
+	landmarks,
+} from "./data/landmarks";
 import { locations, getFilteredLocations } from "./data/locations";
 import "./styles/App.css";
 
@@ -26,17 +30,40 @@ function App() {
 		() => getFilteredLocations(locations, searchQuery, category),
 		[searchQuery, category],
 	);
+	const filteredLandmarks = useMemo(
+		() => getFilteredLandmarks(landmarks, searchQuery, category),
+		[searchQuery, category],
+	);
+
+	const [focusLandmarkId, setFocusLandmarkId] = useState(
+		/** @type {string | null} */ (null),
+	);
+	const [scrollIntoViewLandmarkId, setScrollIntoViewLandmarkId] = useState(
+		/** @type {string | null} */ (null),
+	);
 
 	const onBusinessMarkerClick = useCallback((idx) => {
 		setScrollIntoViewIdx(idx);
+	}, []);
+
+	const onLandmarkMarkerClick = useCallback((id) => {
+		setScrollIntoViewLandmarkId(id);
 	}, []);
 
 	const onFocusConsumed = useCallback(() => {
 		setFocusBusinessIndex(null);
 	}, []);
 
+	const onFocusLandmarkConsumed = useCallback(() => {
+		setFocusLandmarkId(null);
+	}, []);
+
 	const onAccordionActivate = useCallback((idx) => {
 		setFocusBusinessIndex(idx);
+	}, []);
+
+	const onSelectLandmark = useCallback((id) => {
+		setFocusLandmarkId(id);
 	}, []);
 
 	return (
@@ -50,10 +77,14 @@ function App() {
 				category={category}
 				onCategoryChange={setCategory}
 				filteredLocations={filteredLocations}
+				filteredLandmarks={filteredLandmarks}
 				allLocations={locations}
 				onSelectLocation={onAccordionActivate}
+				onSelectLandmark={onSelectLandmark}
 				scrollIntoViewIdx={scrollIntoViewIdx}
 				onScrollConsumed={() => setScrollIntoViewIdx(null)}
+				scrollIntoViewLandmarkId={scrollIntoViewLandmarkId}
+				onLandmarkScrollConsumed={() => setScrollIntoViewLandmarkId(null)}
 			/>
 			<HarlemMap
 				locations={locations}
@@ -61,6 +92,9 @@ function App() {
 				focusBusinessIndex={focusBusinessIndex}
 				onFocusConsumed={onFocusConsumed}
 				onBusinessMarkerClick={onBusinessMarkerClick}
+				focusLandmarkId={focusLandmarkId}
+				onFocusLandmarkConsumed={onFocusLandmarkConsumed}
+				onLandmarkMarkerClick={onLandmarkMarkerClick}
 			/>
 		</div>
 	);

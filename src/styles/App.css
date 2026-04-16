@@ -29,9 +29,9 @@
 		display: none !important;
 	}
 
-	/* Popup Get Directions link hover */
+	/* Popup directions link — keep hover without underline */
 	.gm-style .gm-style-iw-d a[href*="google.com/maps/dir"]:hover {
-		text-decoration: underline;
+		text-decoration: none;
 	}
 	/* Popup website button hover */
 	.gm-style .gm-style-iw-d a[aria-label="Open website"]:hover {
