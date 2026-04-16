@@ -2,7 +2,7 @@
 	"name": "harlem-map-playground",
 	"version": "1.0.0",
 	"private": true,
-	"homepage": "https://estein14.github.io/bradhurst",
+	"homepage": ".",
 	"dependencies": {
 		"@emotion/react": "^11.14.0",
 		"@emotion/styled": "^11.14.1",
@@ -19,6 +19,7 @@
 	"scripts": {
 		"start": "react-scripts start",
 		"build": "react-scripts build",
+		"postbuild": "node ./scripts/copy-spa-404.cjs",
 		"predeploy": "npm run build",
 		"deploy": "gh-pages -d build",
 		"test": "react-scripts test",
