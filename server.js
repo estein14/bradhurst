@@ -1,24 +1,25 @@
-import express from "express";
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
+/**
+ * Serves the Create React App production build from `build/`.
+ * Run `npm run build` first. For development use `npm start` (CRA dev server).
+ *
+ * Optional: load .env if you use dotenv for PORT etc. (API key is baked in at build time via REACT_APP_GOOGLE_MAPS_API_KEY).
+ */
+require("dotenv").config();
 
-dotenv.config();
+const express = require("express");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 5173;
-const __dirname = path.resolve();
+const buildDir = path.join(__dirname, "build");
 
-app.use("/static", express.static(path.join(__dirname, "static")));
+app.use(express.static(buildDir));
 
-app.get("/", (req, res) => {
-	const html = fs
-		.readFileSync(path.join(__dirname, "index.html"), "utf8")
-		.replace("__API_KEY__", process.env.GOOGLE_MAPS_API_KEY || "");
-	res.setHeader("Cache-Control", "no-store");
-	res.send(html);
+app.get("*", (req, res) => {
+	res.sendFile(path.join(buildDir, "index.html"));
 });
 
 app.listen(PORT, () => {
-	console.log(`Local map running → http://localhost:${PORT}`);
+	console.log(`Production build → http://localhost:${PORT}`);
+	console.log(`(Run "npm run build" first if build/ is missing)`);
 });

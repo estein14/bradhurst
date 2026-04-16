@@ -1,0 +1,275 @@
+	/* Remove white background wrapper ABOVE your content */
+	.gm-style .gm-style-iw-t {
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+
+	/* Also remove background from main container */
+	.gm-style .gm-style-iw-c {
+		padding: 0 !important;
+		border-radius: 8px !important;
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+
+	/* Ensure inner container has no spacing */
+	.gm-style .gm-style-iw-d {
+		padding: 0 !important;
+		margin: 0 !important;
+		overflow: hidden !important;
+	}
+
+	/* Remove pointer triangle */
+	.gm-style .gm-style-iw-t::after {
+		display: none !important;
+	}
+
+	/* Hide close button */
+	.gm-ui-hover-effect {
+		display: none !important;
+	}
+
+	/* Popup Get Directions link hover */
+	.gm-style .gm-style-iw-d a[href*="google.com/maps/dir"]:hover {
+		text-decoration: underline;
+	}
+	/* Popup website button hover */
+	.gm-style .gm-style-iw-d a[aria-label="Open website"]:hover {
+		background: rgba(132, 132, 132, 0.8) !important;
+	}
+
+	/* ===== (A) LAYOUT — full-screen map with floating accordion ===== */
+	html,
+	body {
+		height: 100vh;
+		margin: 0;
+		font-family:
+			system-ui,
+			-apple-system,
+			BlinkMacSystemFont,
+			"SF Pro Text",
+			"SF Pro Display",
+			"Segoe UI",
+			sans-serif;
+	}
+
+	.app-layout {
+		position: relative;
+		display: flex;
+		width: 100%;
+		height: 100vh; /* fill the viewport height */
+	}
+
+	.harlem-map-root {
+		flex: 1;
+		height: 100%;
+		min-width: 0; /* allow map to shrink so accordion doesn't wrap */
+		border-radius: 0;
+		box-shadow: none;
+		overflow: hidden;
+	}
+
+	.accordion-panel {
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		width: 420px;
+		max-width: calc(100% - 32px);
+		max-height: calc(
+			100% - 32px
+		); /* never taller than viewport, but otherwise auto */
+		display: flex;
+		flex-direction: column;
+		overflow: visible;
+		border-radius: 12px;
+		box-sizing: border-box;
+		padding: 8px 8px 8px 10px; /* breathing room inside */
+		z-index: 2; /* ensure panel content sits above the map */
+	}
+
+	/* Names-only mode: slimmer column */
+	.accordion-panel.accordion-panel--compact {
+		width: 288px;
+		max-width: calc(100% - 32px);
+	}
+
+	/* WebKit */
+	.accordion-panel::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* ===== Responsive accordion sizing & visibility ===== */
+	@media (max-width: 1200px) {
+		.accordion-panel {
+			width: 360px;
+			flex-basis: 360px;
+		}
+		.accordion-panel.accordion-panel--compact {
+			width: 268px;
+			flex-basis: 268px;
+		}
+	}
+	@media (max-width: 1050px) {
+		.accordion-panel {
+			width: 300px;
+			flex-basis: 300px;
+		}
+		.accordion-panel.accordion-panel--compact {
+			width: 248px;
+			flex-basis: 248px;
+		}
+	}
+	@media (max-width: 960px) {
+		.accordion-panel {
+			width: 260px;
+			flex-basis: 260px;
+		}
+		.accordion-panel.accordion-panel--compact {
+			width: 240px;
+			flex-basis: 240px;
+		}
+	}
+
+	@media (max-width: 800px) {
+		/* Hide floating panel on small screens unless full overlay sheet is active */
+		.accordion-panel:not(.mobile-overlay-open) {
+			display: none;
+		}
+		.accordion-panel.mobile-overlay-open {
+			display: flex;
+			position: fixed;
+			inset: 12px;
+			top: 12px;
+			left: 12px;
+			right: 12px;
+			bottom: 12px;
+			width: auto;
+			max-width: 500px;
+			max-height: none;
+			height: auto;
+			z-index: 100;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+			border-radius: 12px;
+			padding: 16px 16px 16px 16px;
+			flex-direction: column;
+		}
+		.accordion-panel.mobile-overlay-open .ac-panel-unified {
+			box-sizing: border-box;
+		}
+		/* Full-width sheet on small screens; keep names-only as a density toggle only */
+		.accordion-panel.mobile-overlay-open.accordion-panel--compact {
+			width: auto;
+			max-width: 500px;
+		}
+		.accordion-panel.mobile-overlay-open .ac-results {
+			flex: 1;
+			max-height: none;
+			min-height: 0;
+		}
+		.app-layout {
+			display: block;
+			width: 100%;
+			height: 100vh;
+		}
+		.harlem-map-root {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	/* Search + results shells (MUI fills detail; layout / mobile tweaks stay here) */
+	.accordion-panel .ac-panel-unified {
+		position: relative;
+		z-index: 3;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.accordion-panel .ac-results {
+		max-height: calc(100vh - 120px);
+	}
+
+	/* ===== (B) PIN COLORS — adjust brand look here ===== */
+	:root {
+		--pin: #c86d04; /* darker fill color */
+		--pin-stroke: #0f2748; /* darker outline color */
+	}
+
+	/* Optional embed (?embed=1) — side-by-side like legacy current.html */
+	.app-layout--embed {
+		display: flex;
+		width: 100%;
+		height: auto;
+		aspect-ratio: var(--map-aspect-ratio, 16 / 10);
+		max-height: var(--map-max-height, 800px);
+	}
+	.app-layout--embed .harlem-map-root {
+		flex: 1;
+		height: 100%;
+		min-width: 0;
+	}
+	.app-layout--embed .accordion-panel {
+		position: relative;
+		top: auto;
+		left: auto;
+		width: 420px;
+		flex: 0 0 420px;
+		max-height: 100%;
+		height: 100%;
+		overflow: auto;
+		background: rgba(45, 66, 112, 0.82);
+		border-right: 2px solid #2d4270;
+		z-index: 1;
+	}
+	.app-layout--embed .accordion-panel.accordion-panel--compact {
+		width: 288px;
+		flex: 0 0 288px;
+	}
+	@media (max-width: 1200px) {
+		.app-layout--embed .accordion-panel {
+			width: 360px;
+			flex-basis: 360px;
+		}
+	}
+	@media (max-width: 1050px) {
+		.app-layout--embed .accordion-panel {
+			width: 300px;
+			flex-basis: 300px;
+		}
+	}
+	@media (max-width: 960px) {
+		.app-layout--embed .accordion-panel {
+			width: 260px;
+			flex-basis: 260px;
+		}
+	}
+	@media (max-width: 800px) {
+		.app-layout--embed .accordion-panel {
+			display: none;
+		}
+		.app-layout--embed .accordion-panel.mobile-overlay-open {
+			display: flex;
+			position: fixed;
+			inset: 12px;
+			top: 12px;
+			left: 12px;
+			right: 12px;
+			bottom: 12px;
+			width: auto;
+			max-width: 500px;
+			max-height: none;
+			height: auto;
+			z-index: 100;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+			border-radius: 12px;
+			padding: 16px;
+			flex-direction: column;
+			overflow: visible;
+		}
+	}

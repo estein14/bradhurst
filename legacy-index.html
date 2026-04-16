@@ -56,6 +56,18 @@
 					aria-label="Search locations"
 				/>
 			</div>
+			<div class="ac-category-row">
+				<label class="ac-category-label" for="acCategory">Category</label>
+				<select id="acCategory" class="ac-category-select" aria-label="Filter by category">
+					<option value="all">All</option>
+					<option value="food-drink">Food &amp; Drink</option>
+					<option value="groceries">Groceries</option>
+					<option value="convenience">Convenience</option>
+					<option value="clothing">Clothing</option>
+					<option value="salon-barbershop">Salon / Barbershop</option>
+					<option value="services">Services &amp; more</option>
+				</select>
+			</div>
 		</div>
 	</div>
 	<div id="harlemMap" aria-label="Interactive map of Harlem shops"></div>
@@ -411,6 +423,35 @@
 		border-radius: 30px;
 		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
 		margin-bottom: 10px;
+	}
+
+	#accordionPanel .ac-category-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 0 4px 8px 8px;
+		flex-wrap: wrap;
+	}
+	#accordionPanel .ac-category-label {
+		font-size: 13px;
+		font-weight: 500;
+		color: rgba(0, 0, 0, 0.65);
+	}
+	#accordionPanel .ac-category-select {
+		flex: 1;
+		min-width: 140px;
+		max-width: 100%;
+		font-size: 15px;
+		padding: 10px 12px;
+		border-radius: 12px;
+		border: 1px solid rgba(0, 0, 0, 0.12);
+		background: rgba(255, 255, 255, 0.85);
+		color: #000;
+		cursor: pointer;
+	}
+	#accordionPanel .ac-category-select:focus {
+		outline: 2px solid #ffe9d6;
+		outline-offset: 2px;
 	}
 
 	/* Results container block under the search */
@@ -844,11 +885,142 @@
 		},
 	];
 
+	/** Assign each business a category (edit CATEGORY_BY_NAME to tune). */
+	const CATEGORY_BY_NAME = {
+		"Empire Eye Care": "services",
+		"Patrick’s Place": "food-drink",
+		"Harlem Vista Hotel": "services",
+		"Londel’s": "food-drink",
+		"Mama Tina’s Pizzeria": "food-drink",
+		"Jacob’s Restaurant": "food-drink",
+		"99 Cents Store": "convenience",
+		"SKYLINE FOOD CENTER": "groceries",
+		"City One": "groceries",
+		"D’ Bomby Barbershop": "salon-barbershop",
+		"Western Union (CFSC)": "convenience",
+		"Timbuktu Islamic Center": "services",
+		"Flamboyant Hair": "salon-barbershop",
+		"Suagr Hill Fish Place": "food-drink",
+		"Kingston Bakery": "food-drink",
+		"Roberta's Fine Dining": "food-drink",
+		"Taveras Shoe Repair": "services",
+		"Sabba's Chicken Harlem": "food-drink",
+		"Joe Eady's Fashion": "clothing",
+		"Harlem Dental Care": "services",
+		"Street Corner Resources": "services",
+		"Pizza by Lucille's": "food-drink",
+		"Direct Print Inc.": "services",
+		"Green Laundromat": "services",
+		"NHS Hardware": "convenience",
+		"Super African Hair Braiding": "salon-barbershop",
+		"NY Empire": "convenience",
+		"Polanco": "food-drink",
+		"Ashley African hair braiding": "salon-barbershop",
+		"Glamour 3 Beauty Salon": "salon-barbershop",
+		"Jackson Hewitt Tax Serv.": "services",
+		"D’Clase Barbershop": "salon-barbershop",
+		"Rick's Store Front & Glass Work": "services",
+		"Red Ribbon Pharmacy Inc.": "services",
+	};
+	locations.forEach((loc) => {
+		if (!loc.category) {
+			loc.category = CATEGORY_BY_NAME[loc.name] || "services";
+		}
+	});
+
+	/**
+	 * Historical & cultural landmarks — distinct pins on the map.
+	 * Replace description / learnMoreUrl as you like.
+	 */
+	const landmarks = [
+		{
+			id: "jackie-robinson-park",
+			name: "Jackie Robinson Park",
+			lat: 40.82667,
+			lng: -73.94111,
+			address: "Bradhurst Ave & W 145th St, Harlem",
+			description:
+				"Named for baseball pioneer Jackie Robinson, this park has served Harlem for generations. Fill in historical detail here.",
+			learnMoreUrl: "https://www.nycgovparks.org/parks/jackie-robinson-park",
+		},
+		{
+			id: "polo-grounds",
+			name: "Polo Grounds (historic)",
+			lat: 40.8319,
+			lng: -73.9379,
+			address: "Area of Coogan’s Bluff / Edgecombe Ave & 155th St",
+			description:
+				"Home of the New York Giants and later the Mets until demolition in 1964. Add your narrative here.",
+			learnMoreUrl: "https://en.wikipedia.org/wiki/Polo_Grounds",
+		},
+		{
+			id: "holcombe-rucker-park",
+			name: "Holcombe Rucker Park",
+			lat: 40.8293,
+			lng: -73.9355,
+			address: "W 155th St & Frederick Douglass Blvd",
+			description:
+				"Legendary streetball venue at the heart of basketball culture. Add your copy here.",
+			learnMoreUrl: "https://www.nycgovparks.org/parks/holcombe-rucker-park",
+		},
+		{
+			id: "national-dance-institute",
+			name: "National Dance Institute",
+			lat: 40.82,
+			lng: -73.9409,
+			address: "217 W 147th St, New York, NY 10039",
+			description:
+				"Jacques d’Amboise Center for Learning & the Arts — dance education for children. Add details here.",
+			learnMoreUrl: "https://www.nationaldance.org/",
+		},
+		{
+			id: "dunbar-apartments",
+			name: "Dunbar Apartments",
+			lat: 40.8245,
+			lng: -73.9434,
+			address: "288 W 149th St, New York, NY 10039",
+			description:
+				"A landmark Paul Laurence Dunbar–named housing complex with architectural and cultural significance. Add your research here.",
+			learnMoreUrl:
+				"https://en.wikipedia.org/wiki/Dunbar_Apartment_Buildings",
+		},
+	];
+
 	// Mapping: location index -> accordion details element (kept in sync with filtering)
 	let accordionItems = [];
 
+	function getFilteredLocations() {
+		const query = (
+			document.getElementById("acSearch")?.value || ""
+		).toLowerCase();
+		const cat = document.getElementById("acCategory")?.value || "all";
+		return locations.filter((loc) => {
+			const hay = `${loc.name || ""} ${loc.url || ""}`.toLowerCase();
+			if (!hay.includes(query)) return false;
+			if (cat === "all") return true;
+			return (loc.category || "services") === cat;
+		});
+	}
+
+	/**
+	 * Show only business markers that match search + category; refresh clusters.
+	 */
+	function syncBusinessMarkersToFilter(map, markers, clusterer) {
+		const filtered = getFilteredLocations();
+		const visibleIdx = new Set(filtered.map((loc) => locations.indexOf(loc)));
+		const visibleMarkers = markers.filter((_, idx) => visibleIdx.has(idx));
+		if (clusterer) {
+			clusterer.clearMarkers();
+			clusterer.addMarkers(visibleMarkers);
+		} else {
+			markers.forEach((m, idx) => {
+				m.setMap(visibleIdx.has(idx) ? map : null);
+			});
+		}
+	}
+
 	// Build accordion UI from locations
-	function buildAccordion(markers, map, info) {
+	function buildAccordion(markers, map, info, clusterer) {
 		const panel = document.getElementById("accordionPanel");
 		let resultsShell = panel.querySelector(".ac-results");
 		if (!resultsShell) {
@@ -863,13 +1035,7 @@
 		resultsShell.querySelectorAll("#acList").forEach((n) => n.remove());
 		resultsShell.appendChild(listContainer);
 
-		const query = (
-			document.getElementById("acSearch")?.value || ""
-		).toLowerCase();
-		const filtered = locations.filter((loc) => {
-			const hay = `${loc.name || ""} ${loc.url || ""}`.toLowerCase();
-			return hay.includes(query);
-		});
+		const filtered = getFilteredLocations();
 
 		accordionItems = [];
 
@@ -884,6 +1050,7 @@
 				<span>No Results</span>
 			`;
 			listContainer.appendChild(emptyEl);
+			syncBusinessMarkersToFilter(map, markers, clusterer);
 			return;
 		}
 
@@ -960,6 +1127,7 @@
 				google.maps.event.trigger(marker, "click");
 			});
 		});
+		syncBusinessMarkersToFilter(map, markers, clusterer);
 	}
 
 	const SNAZZY_STYLE = [
@@ -1181,6 +1349,18 @@
 	     (F) MAP BOOTSTRAP — usually no need to edit below here
 	   ========================================================== */
 	async function initHarlemMap() {
+		if (typeof markerClusterer === "undefined") {
+			await new Promise((resolve, reject) => {
+				const s = document.createElement("script");
+				s.src =
+					"https://unpkg.com/@googlemaps/markerclusterer@2.5.3/dist/index.min.js";
+				s.onload = resolve;
+				s.onerror = () =>
+					reject(new Error("Failed to load MarkerClusterer"));
+				document.head.appendChild(s);
+			});
+		}
+
 		// Pin icon style (clean circle to match your design)
 		const pinIcon = {
 			// soft teardrop (rounder, less pointy)
@@ -1327,25 +1507,83 @@
 			return m;
 		});
 
+		const clusterer = new markerClusterer.MarkerClusterer({ map, markers });
+
+		// Landmarks — navy pin (not clustered; always visible)
+		const landmarkPinIcon = {
+			path: "M12 2C7.6 2 4 5.5 4 9.9c0 6 8 12.1 8 12.1s8-6.1 8-12.1C20 5.5 16.4 2 12 2z",
+			fillColor: "#1a3f70",
+			fillOpacity: 1,
+			strokeColor: "#ffffff",
+			strokeOpacity: 1,
+			strokeWeight: 3,
+			scale: 1.75,
+			anchor: new google.maps.Point(12, 22),
+		};
+
+		landmarks.forEach((lm) => {
+			const lmMarker = new google.maps.Marker({
+				position: { lat: lm.lat, lng: lm.lng },
+				title: lm.name,
+				icon: landmarkPinIcon,
+				map,
+				zIndex: 1000,
+			});
+			lmMarker.addListener("click", () => {
+				const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lm.lat},${lm.lng}`;
+				const escapeHtml = (s) =>
+					String(s)
+						.replace(/&/g, "&amp;")
+						.replace(/</g, "&lt;")
+						.replace(/>/g, "&gt;")
+						.replace(/"/g, "&quot;");
+				const moreBlock = lm.learnMoreUrl
+					? `<p style="margin:12px 0 0;"><a href="${lm.learnMoreUrl}" target="_blank" rel="noopener" style="color:#1a3f70;font-weight:600;">Learn more →</a></p>`
+					: "";
+				const html = `
+        <div style="max-width:320px;padding:0;font-family:system-ui,sans-serif;">
+          <div style="font-weight:600;font-size:17px;margin-bottom:6px;color:#000;">${escapeHtml(lm.name)}</div>
+          ${
+				lm.address
+					? `<div style="font-size:13px;margin-bottom:8px;color:#333;">${escapeHtml(lm.address)}</div>`
+					: ""
+			}
+          <div style="font-size:14px;line-height:1.45;color:#222;">${escapeHtml(lm.description)}</div>
+          ${moreBlock}
+          <p style="margin:12px 0 0;">
+            <a href="${directionsUrl}" target="_blank" rel="noopener" style="color:#c86d04;font-weight:600;">Get Directions</a>
+          </p>
+        </div>`;
+				info.setContent(html);
+				info.open({ anchor: lmMarker, map });
+				map.panTo(lmMarker.getPosition());
+			});
+		});
+
 		map.addListener("click", () => {
 			info.close();
 		});
-		// Build accordion after markers exist
-		buildAccordion(markers, map, info);
+
+		buildAccordion(markers, map, info, clusterer);
 		const search = document.getElementById("acSearch");
 		if (search) {
 			search.addEventListener("input", () =>
-				buildAccordion(markers, map, info),
+				buildAccordion(markers, map, info, clusterer),
+			);
+		}
+		const category = document.getElementById("acCategory");
+		if (category) {
+			category.addEventListener("change", () =>
+				buildAccordion(markers, map, info, clusterer),
 			);
 		}
 
-		// Cluster markers (works automatically as you zoom out)
-		new markerClusterer.MarkerClusterer({ map, markers });
-
-		// Optional: auto-fit to pins on load
-		if (FIT_TO_MARKERS_ON_LOAD && markers.length) {
+		if (FIT_TO_MARKERS_ON_LOAD && (markers.length || landmarks.length)) {
 			const bounds = new google.maps.LatLngBounds();
 			markers.forEach((m) => bounds.extend(m.getPosition()));
+			landmarks.forEach((lm) =>
+				bounds.extend({ lat: lm.lat, lng: lm.lng }),
+			);
 			map.fitBounds(bounds, 48);
 		}
 
