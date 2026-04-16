@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/bradhurst/static/css/main.4170c9e0.css",
-    "main.js": "/bradhurst/static/js/main.8767aa17.js",
-    "index.html": "/bradhurst/index.html",
-    "main.4170c9e0.css.map": "/bradhurst/static/css/main.4170c9e0.css.map",
-    "main.8767aa17.js.map": "/bradhurst/static/js/main.8767aa17.js.map"
+    "main.css": "./static/css/main.4170c9e0.css",
+    "main.js": "./static/js/main.8767aa17.js",
+    "index.html": "./index.html",
+    "main.4170c9e0.css.map": "./static/css/main.4170c9e0.css.map",
+    "main.8767aa17.js.map": "./static/js/main.8767aa17.js.map"
   },
   "entrypoints": [
     "static/css/main.4170c9e0.css",
